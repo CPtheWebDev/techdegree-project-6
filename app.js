@@ -67,7 +67,7 @@ function checkWin () {
   // Check if the user has won the game and changes the display
   const totalLetters = document.querySelectorAll(".letter");
   const lettersRevealed = document.querySelectorAll(".show");
-  headline = document.querySelector(".title");
+  const headline = document.querySelector(".title");
   if (totalLetters.length === lettersRevealed.length) {
     overlay.style.display = "flex";
     overlay.className += " win";
@@ -83,14 +83,14 @@ qwerty.addEventListener('click', (e) => {
   // Listens for a click on qwery buttons and prevents user from clicking the same button twice
   // Also decreases lives when a button that does not match the phrase and updates missed counter
   const eventTarget = e.target;
+  const letterFound = checkLetter(eventTarget.textContent);
   if (eventTarget.tagName === 'BUTTON') {
       eventTarget.className = "chosen";
       eventTarget.disabled = true;
-  }
-  const letterFound = checkLetter(eventTarget.textContent);
-  if (letterFound === null) {
+    if (letterFound === null) {
     document.querySelector('ol').lastElementChild.remove();
     missed++;
+    }
   }
   checkWin();
 });

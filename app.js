@@ -39,7 +39,9 @@ function addPhraseToDisplay(arr) {
       const newLi = document.createElement('li');
       newLi.textContent = arr[i];
       if (arr[i] !== ' ') {
-          newLi.className = "letter"
+        newLi.className = "letter"
+      } else {
+        newLi.className = "space"
       }
       letterList.appendChild(newLi);
     }

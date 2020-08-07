@@ -1,14 +1,9 @@
-// Game Variables
-const qwerty = document.querySelector('#qwerty');
-const phrase = document.querySelector('#phrase');
-let missed = 0;
-
-// Hide Start Screen
+// Global Variables
 const overlay = document.querySelector('.start');
+const letterList = document.querySelector('#phrase ul');
+const qwerty = document.querySelector('#qwerty');
 const startButton = document.querySelector('.btn__reset');
-startButton.addEventListener('click', () => {
-  overlay.style.display = "none";
-});
+let missed = 0;
 
 // Phrases
 const phrases = [
@@ -31,10 +26,9 @@ function getRandomPhraseAsArray(arr) {
     return arrayOfCharacters;
 }
 
-function addPhraseToDisplay(arr) {
+function addPhraseToDisplay(arr, list) {
     // Creates a list item for each character in an array of letters and adds it to "#phrase ul"
-    // Also adds the class "letter" to each character that is not a space
-    const letterList = document.querySelector('#phrase ul');
+    // Also adds the class "letter" to each letter character and "space" to each space character
     for (let i = 0; i < arr.length; i++) {
       const newLi = document.createElement('li');
       newLi.textContent = arr[i];
@@ -43,20 +37,38 @@ function addPhraseToDisplay(arr) {
       } else {
         newLi.className = "space"
       }
-      letterList.appendChild(newLi);
+      list.appendChild(newLi);
     }
 }
 
-const phraseArray = getRandomPhraseAsArray(phrases);
-addPhraseToDisplay(phraseArray);
+// Start Game
+startButton.addEventListener('click', () => {
+  // Clears overlay and generates a random phrase while clearing any content from previous games
+  missed = 0;
+  letterList.textContent = "";
+  addPhraseToDisplay(getRandomPhraseAsArray(phrases), letterList);
+  const key = document.querySelectorAll(".chosen");
+  for (let i = 0; i < key.length; i++) {
+    key[i].className = "";
+    key[i].disabled = false;
+  }
+  document.querySelector('ol').innerHTML = `
+    <li class="tries"><img src="images/liveHeart.png" alt ="liveHeart" height="35" width="30"></li>
+    <li class="tries"><img src="images/liveHeart.png" alt ="liveHeart" height="35" width="30"></li>
+    <li class="tries"><img src="images/liveHeart.png" alt ="liveHeart" height="35" width="30"></li>
+    <li class="tries"><img src="images/liveHeart.png" alt ="liveHeart" height="35" width="30"></li>
+    <li class="tries"><img src="images/liveHeart.png" alt ="liveHeart" height="35" width="30"></li>
+  `
+  overlay.className = "";
+  overlay.style.display = "none";
+});
 
-function checkLetter(letterPressed) {
+function checkLetter(letterPressed, totalLetters) {
   // Checks if a letter pressed matches a letter of the phrase. 
   // If there is a match reveal the letter and return the value, otherwise return null.
-  const letters = document.querySelectorAll(".letter");
   let match = null;
-  for (let i = 0; i < letters.length; i++) {
-    const letterChecked = letters[i];
+  for (let i = 0; i < totalLetters.length; i++) {
+    const letterChecked = totalLetters[i];
     if (letterChecked.textContent.toLowerCase() === letterPressed) {
       letterChecked.className += " show";
       match = letterChecked;
@@ -65,27 +77,30 @@ function checkLetter(letterPressed) {
   return match;
 }
 
-function checkWin () {
+function endGame(winLoss, headline, buttonContent) {
+  // Changes overlay content based on a win or loss
+  overlay.style.display = "flex";
+  overlay.className = winLoss;
+  document.querySelector(".title").textContent = headline;
+  startButton.textContent = buttonContent;
+}
+
+function checkWin(totalLetters) {
   // Check if the user has won the game and changes the display
-  const totalLetters = document.querySelectorAll(".letter");
   const lettersRevealed = document.querySelectorAll(".show");
-  const headline = document.querySelector(".title");
   if (totalLetters.length === lettersRevealed.length) {
-    overlay.style.display = "flex";
-    overlay.className += " win";
-    headline.textContent = "You Win!";
+    endGame("win", "You Win", "Play Again");
   } else if (missed > 4) {
-    overlay.style.display = "flex";
-    overlay.className += " lose";
-    headline.textContent = "Sorry, You Lost.";
+    endGame("lose", "Sorry, You Lost.", "Try Again")
   }
 }
 
 qwerty.addEventListener('click', (e) => {
   // Listens for a click on qwery buttons and prevents user from clicking the same button twice
   // Also decreases lives when a button that does not match the phrase and updates missed counter
+  const totalLetters = document.querySelectorAll(".letter");
   const eventTarget = e.target;
-  const letterFound = checkLetter(eventTarget.textContent);
+  const letterFound = checkLetter(eventTarget.textContent, totalLetters);
   if (eventTarget.tagName === 'BUTTON') {
       eventTarget.className = "chosen";
       eventTarget.disabled = true;
@@ -94,5 +109,5 @@ qwerty.addEventListener('click', (e) => {
     missed++;
     }
   }
-  checkWin();
+  checkWin(totalLetters);
 });
